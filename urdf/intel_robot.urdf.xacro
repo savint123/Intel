@@ -1,0 +1,231 @@
+<?xml version="1.0"?>
+<robot name="roscontrol" xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+
+<xacro:property name="bodyrad" value="0.1"/>
+<xacro:property name="baselen" value="0.1"/>
+<xacro:property name="base_mass" value="1"/>
+<xacro:property name="toplen" value="0.5"/>
+<xacro:property name="top_mass" value="8"/>
+<xacro:property name="wheelrad" value="0.025"/>
+<xacro:property name="wheelwidth" value="0.025"/>
+<xacro:property name="casterrad" value="0.012"/>
+<xacro:property name="caster_mass" value="0.2"/>
+<xacro:property name="pi" value="3.1415"/>
+<xacro:property name="wheel_mass" value="0.2"/>
+
+ <xacro:macro name="default_inertial" params="mass">
+    <inertial>
+      <mass value="${mass}" />
+      <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    </inertial>
+  </xacro:macro>
+<xacro:macro name="cylinder_inertia" params ="m r h">
+  <inertial>
+   <mass value="${m}"/>
+   <inertia ixx="${m*(3*r*r+h*h)/12}"  ixy="0.0" ixz="0.0"
+            iyy="${m*(3*r*r+h*h)/12}"  iyz= "0.0"
+            izz="${m*r*r/2}"/>
+   </inertial>
+</xacro:macro>
+
+<xacro:macro name="sphere_inertia" params ="m r">
+  <inertial>
+   <mass value="${m}"/>
+   <inertia ixx="${m*(r*r*2)/5}"  ixy="0.0" ixz="0.0"
+            iyy="${m*(r*r*2)/5}"  iyz= "0.0"
+            izz="${m*(r*r*2)/5}"/>
+   </inertial>
+</xacro:macro>
+
+
+<xacro:macro name="caster" params="suffix reflect">
+
+<!--link name="${suffix}_caster"-->
+  <visual>
+   <geometry>
+     <sphere radius="${casterrad}"/>
+     </geometry>
+     <origin rpy="0 0 0" xyz="${reflect*0.0875} 0 -0.062"/>
+     <material name="black"/>
+    </visual>
+    <surface>
+            <friction>
+              <ode>
+                <mu>0</mu>
+                <mu2>0</mu2>
+                <slip1>1.0</slip1>
+                <slip2>1.0</slip2>
+              </ode>
+            </friction>
+          </surface>
+    <collision>
+    <origin rpy="0  0  0" xyz="${reflect*0.0875} 0 -0.0625"/>
+      <geometry>
+        <sphere radius="${casterrad}" />
+      </geometry>
+    </collision>
+   <xacro:sphere_inertia m="${caster_mass}" r="${casterrad}"/>
+  <!--/link-->
+ <!--joint name="${suffix}_caster_to_wheel" type="fixed"> 
+    
+    <parent link="base_link"/>
+    <child link="${suffix}_caster"/>
+    <origin xyz="${reflect*0.0875} 0 -0.06"/>
+    <dynamics damping="0.0" friction="0.0" implicitSpringDamper="True"/>
+  </joint-->
+
+<!--gazebo reference="${suffix}_caster">
+      <mu1 value="200.0"/>
+      <mu2 value="100.0"/>
+      <kp value="10000000.0" />
+      <kd value="1.0" />
+      <material>Gazebo/Grey</material>
+    </gazebo-->
+
+
+  <!--transmission name="${suffix}_caster_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="${suffix}_caster_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="${suffix}_caster_joint">
+    <hardwareInterface>VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission-->
+</xacro:macro>
+
+
+
+
+
+
+<link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="${baselen}" radius="${bodyrad}" />
+      </geometry>
+      <origin xyz="0 0 0"/>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0.0"/>
+      <geometry>
+        <cylinder length="${baselen}" radius="${bodyrad}" />
+      </geometry>
+    </collision>
+<xacro:cylinder_inertia m="${top_mass}" r="${bodyrad}" h="${baselen}"/>
+
+  <xacro:caster suffix="front" reflect="1"/>
+  <xacro:caster suffix="back" reflect="-1"/>
+  </link>
+ <gazebo reference="base_link">
+      <gravity value="True"/>
+      <material>Gazebo/Blue</material>
+    </gazebo>
+
+
+<link name="top_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${bodyrad}" length="${toplen}"/>
+      </geometry>
+      <origin xyz="0 0 0.25" />
+     </visual>
+    <collision>
+      <origin xyz="0 0 0.25" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="${bodyrad}" length="${toplen}"/>
+      </geometry>
+    </collision>
+    <xacro:cylinder_inertia m="${top_mass}" r="${bodyrad}" h="${toplen}"/>
+</link>
+
+
+<gazebo reference="top_link">
+      <gravity value="True"/>
+      <material>Gazebo/Red</material>
+    </gazebo>
+
+
+<joint name="base_to_top" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_link"/>
+    <origin xyz="0 0 0.05"/>
+</joint>
+
+
+<xacro:macro name="wheel" params="prefix suffix reflect">
+
+    <link name="${prefix}_${suffix}_wheel">
+      <visual>
+        <origin rpy="1.57 0 0" xyz="0 0 0" />
+        <geometry>
+          <cylinder radius="${wheelrad}" length="${wheelwidth}"/>
+        </geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin rpy="1.57 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder radius="${wheelrad}" length="${wheelwidth}"/>
+        </geometry>
+      </collision>
+     <xacro:cylinder_inertia m="${wheel_mass}" r="${wheelrad/3}" h="${wheelwidth}"/>
+    </link>
+    <joint name="${prefix}_${suffix}_wheel_joint" type="continuous">
+      <axis xyz="0 1 0" rpy="0 0 0" />
+      <parent link="base_link"/>
+      <child link="${prefix}_${suffix}_wheel"/>
+      <origin xyz="0 ${reflect*0.1126} -0.05" rpy="0 0 0"/>
+       <dynamics damping="0.20" friction="0.90"/>
+      <limit effort="1000000" velocity="1000000"/>
+    </joint>
+    <gazebo reference="${prefix}_${suffix}_wheel">
+      <mu1 value="200.0"/>
+      <mu2 value="100.0"/>
+      <kp value="10000000.0" />
+      <kd value="1.0" />
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+
+  <transmission name="${prefix}_${suffix}_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="${prefix}_${suffix}_wheel_motor">
+    <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="${prefix}_${suffix}_wheel_joint">
+    <hardwareInterface>VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+ </xacro:macro>
+
+
+<xacro:wheel prefix="scooter" suffix="right" reflect="-1"/>
+<xacro:wheel prefix="scooter" suffix="left" reflect="1"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+
+
+
+</robot>
