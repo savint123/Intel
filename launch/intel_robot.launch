@@ -11,13 +11,14 @@
   <arg name="model" value="$(arg model)"/>
 </include>
 <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/>
+<param name="/robot_description" command="$(find xacro)/xacro --inorder $(arg model)"/>
 
-  
+<!--node name="spawn_intel_robot" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="- param robot_descrption -z 1 -file '$(find intel)'/urdf/intel_robot.urdf -urdf robot_desciption -model intel "/-->
 
 <rosparam command="load" file="$(find intel)/config/joints.yaml"/>
 <rosparam command="load" file="$(find intel)/config/diffdrive.yaml"/>
 
-<node name="intel_robot_controller_spawner" pkg="controller_manager" type="spawner" respawn="true" output="screen"   args="intel_robot/joint_state_controller intel_robot/diff_drive_controller  --shutdown-timeout 3"/>
+<node name="intel_robot_controller_spawner" pkg="controller_manager" type="spawner" respawn="true" output="screen"   args="intel_robot/joint_state_controller  intel_robot/diff_drive_controller"/>
 
 <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> <param name="default_topic" value="intel_robot/diff_drive_controller/cmd_vel"/>
 </node>
@@ -25,7 +26,7 @@
 
 <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher" respawn="false" output="screen"/> 
 
-<!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/-->
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
 
 </launch>
 

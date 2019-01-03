@@ -10,17 +10,16 @@ intel_robot:
       pose_covariance_diagonal: [0.001, 0.001, 1000.0, 1000.0, 1000.0, 1000.0]
       twist_covariance_diagonal: [0.001, 0.001, 1000.0, 1000.0, 1000.0, 1000.0]
       base_frame_id: base_link
-
+      pid: {p: 10000.0, i: 1.0, d: 10000.0}
       linear:
           x:
              has_velocity_limits    : true
-             max_velocity           : 1  # m/s
-             min_velocity           : -1 # m/s
+             max_velocity           : 5  # m/s
+             min_velocity           : -5 # m/s
              has_acceleration_limits: true
-             max_acceleration       : 0.7  # m/s^2
-             min_acceleration       : -0.4 # m/s^2
-             has_jerk_limits        : true
-             max_jerk               : 0.20  # m/s^3
+             max_acceleration       : 1.1 # m/s^2
+             min_acceleration       : -1.1 # m/s^2
+            
 
 
       angular:
@@ -29,9 +28,4 @@ intel_robot:
               max_velocity           : 1.5  # rad/s
               has_acceleration_limits: true
               max_acceleration       : 1.5  # rad/s^2
-              has_jerk_limits        : true
-              max_jerk               : 2.5  # rad/s^3
 
-     
-
-  
