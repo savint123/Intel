@@ -20,9 +20,13 @@
 class experiment_{
 
 public:
-// double roll, pitch, yaw;
-// double pose_x,pose_y, vel_x, vel_y, ang_z, acc_x, acc_y;
-// double error, temp_ang_z =0;
+
+experiment_(ros::NodeHandle &nh){
+    
+    odom_sub = nh.subscribe("intel_robot/diff_drive_controller/odom",100,&experiment_::odomCallback, this);
+    imu_sub = nh.subscribe("imu",100, &experiment_::imuCallback, this);
+    vel_pub = nh.advertise<geometry_msgs::Twist>("intel_robot/diff_drive_controller/cmd_vel",100);
+}
 
 void odomCallback(const nav_msgs::Odometry::ConstPtr msg){
 
@@ -41,71 +45,95 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr msg){
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 }
 
-void run(double &velocity, double &distance, double &propotional, int &rate){
+double run(double &velocity, double &distance, double &propotional, int &rate){
     
     geometry_msgs::Twist msg;
     ref_yaw= 0;
-    std::vector<double> pattern = decceleration_pattern(rate, velocity);
-    // int sudo = 0;
     
-    if(pose_x< distance){
-    msg.linear.x = velocity;
-    //* ###################################################################### *//
-    //* additing propotional controller for straight line cruise control       *//
+    if(pose_x< distance){     
+        msg.linear.x = velocity;
+//******** adding propotional controller for straight line cruise control*******// 
+        error = yaw - ref_yaw;
+        if (error != 0){
+            error = propotional * error;
+            msg.angular.z = -(error*5);               
+        }
+        else{
+            msg.angular.z = 0;
+        }
+        vel_pub.publish(msg);   
+    }
+
+    // else if(pose_x >distance){
+    //      std::vector<double> pattern = decceleration_pattern(rate, velocity);        
+    //     for (int i = 0;  i< rate; i++){
+    //         deccl = velocity* pattern[i];
+    //         msg.linear.x = deccl;
+    //         vel_pub.publish(msg);
+    //         ROS_INFO("decceleration : [%f]", deccl);
+    //         break;
+
+    //     }
+    // }
+    temp_ang_z = ang_z;
+    // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
+    // std::cout<<"\n";
+    return pose_x;
+       
+}
+
+void stop(double value,double &propotional){
+    geometry_msgs::Twist msg;
+    ref_yaw= 0;
     error = yaw - ref_yaw;
     if (error != 0){
         error = propotional * error;
-        msg.angular.z = -(error*5);
-    }
-    else{ msg.angular.z = 0;}
-    //* ###################################################################### *//  
-    vel_pub.publish(msg);   
+        msg.angular.z = -(error*5);               
     }
     else{
-        msg.linear.x = 0 ;
-        vel_pub.publish(msg);
+        msg.angular.z = 0;
     }
-    // else if(pose_x >distance && pose_x < (distance+0.5)){
-        
-    //     for (int i = 0;  i< rate; i++){
-    //     msg.linear.x = -pattern[i+2];
-    //     vel_pub.publish(msg);
-    //     ROS_INFO("decceleration : [%f]", -pattern[i+2]);
-    //     break;
-    //     }}
-
-
-
-    // ROS_INFO("pose_x: [%f], pose_y: [%f], pitch: [%f], yaw: [%f]",pose_x,pose_y, pitch, yaw);
-    // temp_ang_z = ang_z;
-    // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);
-   
-    // std::cout<<"\n";
-    
+    msg.linear.x = value; 
+    std::cout<<value<<std::endl;
+    vel_pub.publish(msg);
 }
 
-std::vector<double> decceleration_pattern(int &number, double &velocity){
+std::vector<double> decceleration_pattern(int &number, double &velocity, int &opt){
      std::vector<double> decceleration ;
-     for(int i=0;i<number; i++){
-
-         decceleration.push_back(-(velocity/number)* i +velocity);
-
-
+     switch(opt){
+        case 1:
+            for(int i=0;i<number; i++){
+                // straight line decceleration profiles
+                decceleration.push_back(-(velocity/number)* i +velocity);
+            }
+            break;
+        case 2:
+            for(int i=0;i<number; i++){
+                // exponential deccelration profile
+                decceleration.push_back(velocity * std::exp(-i));
+            }
+            break;
+        case 3:
+            for(int i=0;i<number; i++){
+                // logarithmic decceleration profile
+                decceleration.push_back(- velocity * std::log(i));
+            }
+            break;
      }
+     
      return decceleration;
-
-
 }
 
 
 private:
-
-ros::NodeHandle n;
-ros::Publisher vel_pub = n.advertise<geometry_msgs::Twist>("intel_robot/diff_drive_controller/cmd_vel",100);
+ros::Publisher vel_pub ;//= n.advertise<geometry_msgs::Twist>("intel_robot/diff_drive_controller/cmd_vel",100);
+ros::Subscriber odom_sub;// = nh.subscribe("intel_robot/diff_drive_controller/odom",100,&experiment_::odomCallback, &robot);
+ros::Subscriber imu_sub;// = nh.subscribe("imu",100, &experiment_::imuCallback, &robot);
 double ref_z, ref_yaw;
 double roll, pitch, yaw;
 double pose_x,pose_y, vel_x, vel_y, ang_z, acc_x, acc_y;
 double error, temp_ang_z =0;
+double deccl;
 };
 
 
