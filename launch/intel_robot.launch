@@ -17,17 +17,11 @@
 <arg name="use_sim_time" value="$(arg use_sim_time)"/>
 <arg name="headless" value="$(arg headless)"/>
 </include>
-<<<<<<< Updated upstream
-<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/>
-
-  
-=======
 
 <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/-->
 <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
 <node name="spawn_intel_robot" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-param robot_description  -urdf -model intel "/>
->>>>>>> Stashed changes
 
 <rosparam command="load" file="$(find intel)/config/joints.yaml"/>
 <rosparam command="load" file="$(find intel)/config/diffdrive.yaml"/>
