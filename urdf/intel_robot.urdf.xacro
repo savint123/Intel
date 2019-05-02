@@ -12,7 +12,6 @@
 <xacro:property name="wheelwidth" value="0.025"/>
 <xacro:property name="casterrad" value="0.012"/>
 <xacro:property name="caster_mass" value="0.2"/>
-<xacro:property name="pi" value="3.1415"/>
 <xacro:property name="wheel_mass" value="0.2"/>
 
  <xacro:macro name="default_inertial" params="mass">
@@ -42,7 +41,7 @@
 
 <xacro:macro name="caster" params="suffix reflect">
 
-<!--link name="${suffix}_caster"-->
+<link name="${suffix}_caster_link">
   <visual>
    <geometry>
      <sphere radius="${casterrad}"/>
@@ -67,36 +66,8 @@
       </geometry>
     </collision>
    <xacro:sphere_inertia m="${caster_mass}" r="${casterrad}"/>
-  <!--/link-->
- <!--joint name="${suffix}_caster_to_wheel" type="fixed"> 
-    
-    <parent link="base_link"/>
-    <child link="${suffix}_caster"/>
-    <origin xyz="${reflect*0.0875} 0 -0.06"/>
-    <dynamics damping="0.0" friction="0.0" implicitSpringDamper="True"/>
-  </joint-->
-
-<!--gazebo reference="${suffix}_caster">
-      <mu1 value="200.0"/>
-      <mu2 value="100.0"/>
-      <kp value="10000000.0" />
-      <kd value="1.0" />
-      <material>Gazebo/Grey</material>
-    </gazebo-->
-
-
-  <!--transmission name="${suffix}_caster_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <actuator name="${suffix}_caster_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-    <joint name="${suffix}_caster_joint">
-    <hardwareInterface>VelocityJointInterface</hardwareInterface>
-    </joint>
-  </transmission-->
+  </link>
 </xacro:macro>
-
-
 
 
 
@@ -115,8 +86,7 @@
         <cylinder length="${baselen}" radius="${bodyrad}" />
       </geometry>
     </collision>
-  <!--xacro:caster suffix="front" reflect="1"/>
-  <xacro:caster suffix="back" reflect="-1"/-->
+  
   </link>
 
   <gazebo reference="base_link">
@@ -149,7 +119,6 @@
     <origin xyz="0 0 0"/>
 </joint>
 
-<xacro:caster suffix="back" reflect="-1"/>
 
 <gazebo reference="front_caster_link">
       <surface>
@@ -162,26 +131,11 @@
               </ode>
             </friction>
           </surface>
-      <!--mu1 value="0.0"/>
-      <mu2 value="0.0"/>
-      <kp value="10000000.0" />
-      <kd value="1.0" /-->
       <material>Gazebo/Black</material>
      </gazebo>
 
 
-    <!--transmission name="front_caster_wheel_trans">
-       <type>transmission_interface/SimpleTransmission</type>
-       <actuator name="front_caster_wheel_motor">
-         <hardwareInterface>EffortJointInterface</hardwareInterface>
-         <mechanicalReduction>1</mechanicalReduction>
-       </actuator>
-       <joint name="casterf_to_base">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-       </joint>
-  </transmission-->
-
-
+<xacro:caster suffix="back" reflect="-1"/>
 
 <joint name="casterb_to_base" type="fixed">
     <axis xyz="1 1 1"/>
@@ -194,39 +148,15 @@
      <surface>
             <friction>
               <ode>
-                <mu>1</mu>
-                <mu2>1</mu2>
+                <mu>0.005</mu>
+                <mu2>0.005</mu2>
                 <!-- <slip1>0.5</slip1>
                 <slip2>0.5</slip2> -->
               </ode>
             </friction>
           </surface>
-      <!--mu1 value="0.0"/>
-      <mu2 value="0.0"/>
-      <kp value="10000000.0" />
-      <kd value="1.0" /-->
       <material>Gazebo/Black</material>
      </gazebo>
-
-
-    <!--transmission name="back_caster_wheel_trans">
-       <type>transmission_interface/SimpleTransmission</type>
-       <actuator name="back_caster_wheel_motor">
-         <hardwareInterface>EffortJointInterface</hardwareInterface>
-         <mechanicalReduction>1</mechanicalReduction>
-       </actuator>
-       <joint name="casterb_to_base">
-          <hardwareInterface>VelocityJointInterface</hardwareInterface>
-       </joint>
-  </transmission-->
-
-  <xacro:caster suffix="front" reflect="1"/>
-  <xacro:caster suffix="back" reflect="-1"/>
-  </link>
- <gazebo reference="base_link">
-      <gravity value="True"/>
-      <material>Gazebo/Blue</material>
-    </gazebo>
 
 
 <link name="top_link">
@@ -301,7 +231,7 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
     <joint name="${prefix}_${suffix}_wheel_joint">
-    <hardwareInterface>VelocityJointInterface</hardwareInterface>
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
     </joint>
   </transmission>
 
