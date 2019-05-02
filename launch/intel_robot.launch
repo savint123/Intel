@@ -17,8 +17,8 @@
 <arg name="use_sim_time" value="$(arg use_sim_time)"/>
 <arg name="headless" value="$(arg headless)"/>
 </include>
-
 <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/-->
+
 <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
 <node name="spawn_intel_robot" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-param robot_description  -urdf -model intel "/>
@@ -37,13 +37,3 @@
 <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/-->
 
 </launch>
-
-
-
-
-
-
-
-
-
-
