@@ -242,17 +242,6 @@
 <xacro:wheel prefix="scooter" suffix="left" reflect="1"/>
 
 
-
-
-
-
-
-
-
-
-
-
-
 <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
