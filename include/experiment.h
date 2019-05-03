@@ -56,7 +56,7 @@ double run(double &velocity, double &distance, double &propotional, int &rate){
         error = yaw - ref_yaw;
         if (error != 0){
             error = propotional * error;
-            msg.angular.z = -(error*5);               
+            msg.angular.z = -(error);               
         }
         else{
             msg.angular.z = 0;
@@ -64,20 +64,7 @@ double run(double &velocity, double &distance, double &propotional, int &rate){
         vel_pub.publish(msg);   
     }
 
-    // else if(pose_x >distance){
-    //      std::vector<double> pattern = decceleration_pattern(rate, velocity);        
-    //     for (int i = 0;  i< rate; i++){
-    //         deccl = velocity* pattern[i];
-    //         msg.linear.x = deccl;
-    //         vel_pub.publish(msg);
-    //         ROS_INFO("decceleration : [%f]", deccl);
-    //         break;
-
-    //     }
-    // }
-    temp_ang_z = ang_z;
-    // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
-    // std::cout<<"\n";
+    ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
     return pose_x;
        
 }
@@ -88,7 +75,7 @@ void stop(double value,double &propotional){
     error = yaw - ref_yaw;
     if (error != 0){
         error = propotional * error;
-        msg.angular.z = -(error*5);               
+        msg.angular.z = -(error);               
     }
     else{
         msg.angular.z = 0;
