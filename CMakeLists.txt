@@ -12,7 +12,7 @@ find_package (catkin REQUIRED COMPONENTS
 
 catkin_package()
 
-include_directories( ${catkin_INCLUDE_DIRS})
+include_directories( include ${catkin_INCLUDE_DIRS})
 
 install(DIRECTORY config launch urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
@@ -22,4 +22,6 @@ add_executable(intel_vel_node src/vel.cpp)
 add_dependencies(intel_vel_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(intel_vel_node ${catkin_LIBRARIES})
 
-
+add_executable(experiment src/exp.cpp)
+add_dependencies(intel_vel_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(experiment ${catkin_LIBRARIES})
