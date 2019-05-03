@@ -113,9 +113,9 @@ std::vector<double> decceleration_pattern(int &number, double &velocity, int &op
 
 
 private:
-ros::Publisher vel_pub ;//= n.advertise<geometry_msgs::Twist>("intel_robot/diff_drive_controller/cmd_vel",100);
-ros::Subscriber odom_sub;// = nh.subscribe("intel_robot/diff_drive_controller/odom",100,&experiment_::odomCallback, &robot);
-ros::Subscriber imu_sub;// = nh.subscribe("imu",100, &experiment_::imuCallback, &robot);
+ros::Publisher vel_pub ;
+ros::Subscriber odom_sub;
+ros::Subscriber imu_sub;
 double ref_z, ref_yaw;
 double roll, pitch, yaw;
 double pose_x,pose_y, vel_x, vel_y, ang_z, acc_x, acc_y;
