@@ -7,8 +7,8 @@ int main(int argc,char **argv){
     experiment_ robot(nh);
 
 
-    double velocity =0.8, distance = 5.0, propotional = 1.5, pose; 
-    int rate = 100, increment = 0;
+    double velocity =0.5, distance = 5.0, propotional = 0.8, pose; 
+    int rate = 10, increment = 0;
     // get the deccleration profile in vector form and option for choosing between 
     // straght line and exponential 
     int option = 1;
