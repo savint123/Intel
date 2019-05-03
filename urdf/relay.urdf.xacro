@@ -130,7 +130,7 @@
 <joint name="scooter_right_wheel_joint" type="continuous">
     <axis xyz="0 1 0" rpy="0 0 0" />
     <dynamics damping="0.20" friction="0.0"/>
-    <limit effort="10000" velocity="30"/>
+    <limit effort="100" velocity="10"/>
     <parent link="base_link"/>
     <child link="rwheel_link"/>
     <origin xyz="0 0.16189 0"/>
@@ -181,7 +181,7 @@
 <joint name="scooter_left_wheel_joint" type="continuous">
     <axis xyz="0 1 0" rpy="0 0 0" />
     <dynamics damping="0.20" friction="0.0"/>
-    <limit effort="10000" velocity="30"/>
+    <limit effort="100" velocity="10"/>
     <parent link="base_link"/>
     <child link="lwheel_link"/>
     <origin xyz="0 -0.16189 0"/>
