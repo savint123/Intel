@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<robot name="relay" xmlns:xacro="http://ros.org/wiki/xacro">
+
+<xacro:property name="bodyrad" value="0.1"/>
+<xacro:property name="baselen" value="0.1"/>
+<xacro:property name="base_mass" value="1"/>
+<xacro:property name="toplen" value="0.5"/>
+<xacro:property name="top_mass" value="8"/>
+<xacro:property name="wheelrad" value="0.025"/>
+<xacro:property name="wheelwidth" value="0.025"/>
+<xacro:property name="casterrad" value="0.012"/>
+<xacro:property name="caster_mass" value="0.2"/>
+<xacro:property name="wheel_mass" value="0.2"/>
+
+
+  <xacro:macro name="sphere_inertia" params ="m r">
+  <inertial>
+   <mass value="${m}"/>
+   <inertia ixx="${m*(r*r*2)/5}"  ixy="0.0" ixz="0.0"
+            iyy="${m*(r*r*2)/5}"  iyz= "0.0"
+            izz="${m*(r*r*2)/5}"/>
+   </inertial>
+  </xacro:macro>
+  
+  <xacro:macro name="cylinder_inertia" params ="m r h">
+  <inertial>
+   <mass value="${m}"/>
+   <inertia ixx="${m*(3*r*r+h*h)/12}"  ixy="0.0" ixz="0.0"
+            iyy="${m*(3*r*r+h*h)/12}"  iyz= "0.0"
+            izz="${m*r*r/2}"/>
+   </inertial>
+  </xacro:macro>
+
+
+<link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/base_link.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/base_link.dae"/>
+      </geometry>
+   </collision>   
+   <!-- <xacro:cylinder_inertia m ="2" r="0.28" h="0.18906"/> -->
+</link>
+
+<gazebo reference="base_link">
+    <gravity>true</gravity>
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>__default_topic__</topic>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <topicName>imu</topicName>
+        <bodyName>imu_link</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+      </plugin>
+      <pose>0 0 0 0 0 0</pose>
+    </sensor>
+</gazebo>
+
+
+<link name="top_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/top_link.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/top_link.dae"/>
+      </geometry>
+   </collision>
+   <xacro:cylinder_inertia m ="8" r="0.28" h="1.68906" />   
+</link>
+
+<gazebo reference="top_link">
+      <gravity value="True"/>
+      <!-- <material>Gazebo/Red</material> -->
+</gazebo>
+
+<joint name="base_to_top" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_link"/>
+    <origin xyz="0 0 0"/>
+</joint>
+
+<link name="rwheel_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/right_wheel.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/right_wheel.dae"/>
+      </geometry>
+   </collision>
+   <xacro:cylinder_inertia m ="0.1" r="0.05" h="0.05" />   
+</link>
+
+<gazebo reference="rwheel_link">
+      <gravity value="True"/>
+      <!-- <material>Gazebo/Red</material> -->
+</gazebo>
+
+<joint name="scooter_right_wheel_joint" type="continuous">
+    <axis xyz="0 1 0" rpy="0 0 0" />
+    <dynamics damping="0.20" friction="0.0"/>
+    <limit effort="10000" velocity="30"/>
+    <parent link="base_link"/>
+    <child link="rwheel_link"/>
+    <origin xyz="0 0 0"/>
+</joint>
+
+ <transmission name="scooter_right_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="scooter_right_wheel_motor">
+    <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="scooter_right_wheel_joint">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+<link name="lwheel_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/left_wheel.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/left_wheel.dae"/>
+      </geometry>
+   </collision>
+   <xacro:cylinder_inertia m ="0.1" r="0.05" h="0.05" />   
+</link>
+
+<gazebo reference="lwheel_link">
+      <gravity value="True"/>
+      <!-- <material>Gazebo/Red</material> -->
+</gazebo>
+
+<joint name="scooter_left_wheel_joint" type="continuous">
+    <axis xyz="0 1 0" rpy="0 0 0" />
+    <dynamics damping="0.20" friction="0.0"/>
+    <limit effort="10000" velocity="30"/>
+    <parent link="base_link"/>
+    <child link="lwheel_link"/>
+    <origin xyz="0 0 0"/>
+</joint>
+
+ <transmission name="scooter_left_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="scooter_left_wheel_motor">
+    <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="scooter_left_wheel_joint">
+    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+<link name="fcaster_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/front_caster.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/front_caster.dae"/>
+      </geometry>
+   </collision>
+   <xacro:sphere_inertia m ="0.1" r="0.05" />   
+</link>
+
+<gazebo reference="fcaster_link">
+      <gravity value="True"/>
+      <!-- <material>Gazebo/Red</material> -->
+</gazebo>
+
+<joint name="caster_front_wheel_joint" type="fixed">
+    <!-- <axis xyz="0 0 0" rpy="0 0 0" /> -->
+    <dynamics damping="0.20" friction="0.0"/>
+    <limit effort="10000" velocity="30"/>
+    <parent link="base_link"/>
+    <child link="fcaster_link"/>
+    <origin xyz="0 0 0"/>
+</joint>
+
+<link name="bcaster_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://intel/meshes/back_caster.dae"/>
+      </geometry>
+      <origin  rpy="0 0 0" xyz="0 0 0" />
+     </visual>
+    <collision>
+      <origin  rpy="0 0 0" xyz="0 0 0"  />
+      <geometry>
+        <mesh filename="package://intel/meshes/back_caster.dae"/>
+      </geometry>
+   </collision>
+   <xacro:sphere_inertia m ="0.1" r="0.05" />   
+</link>
+
+<gazebo reference="bcaster_link">
+      <gravity value="True"/>
+      <!-- <material>Gazebo/Red</material> -->
+</gazebo>
+
+<joint name="caster_back_wheel_joint" type="fixed">
+    <!-- <axis xyz="0 0 0" rpy="0 0 0" /> -->
+    <dynamics damping="0.20" friction="0.0"/>
+    <limit effort="10000" velocity="30"/>
+    <parent link="base_link"/>
+    <child link="bcaster_link"/>
+    <origin xyz="0 0 0"/>
+</joint>
+
+
+<gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+  </gazebo>
+
+</robot>
