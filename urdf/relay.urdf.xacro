@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot name="relay" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="intel_robot" xmlns:xacro="http://ros.org/wiki/xacro">
 
 <xacro:property name="bodyrad" value="0.1"/>
 <xacro:property name="baselen" value="0.1"/>
@@ -129,11 +129,13 @@
 
 <joint name="scooter_right_wheel_joint" type="continuous">
     <axis xyz="0 1 0" rpy="0 0 0" />
-    <dynamics damping="0.20" friction="0.0"/>
-    <limit effort="100" velocity="10"/>
+    <dynamics damping="0.10" friction="0.0"/>
+    <!-- since we have wheel radius = 0.05 meters and max linear speed 2.5 m/s
+     thus max angular velocity of  wheel is w = v/r = 50  -->
+    <limit effort="100000000" velocity="50"/>
     <parent link="base_link"/>
     <child link="rwheel_link"/>
-    <origin xyz="0 0.16189 0"/>
+    <origin xyz="0 -0.16189 0"/>
 </joint>
 
  <transmission name="scooter_right_wheel_trans">
@@ -180,11 +182,13 @@
 
 <joint name="scooter_left_wheel_joint" type="continuous">
     <axis xyz="0 1 0" rpy="0 0 0" />
-    <dynamics damping="0.20" friction="0.0"/>
-    <limit effort="100" velocity="10"/>
+    <dynamics damping="0.10" friction="0.0"/>
+    <!-- since we have wheel radius = 0.05 meters and max linear speed 2.5 m/s
+     thus max angular velocity of  wheel is w = v/r = 50  -->
+    <limit effort="100000000" velocity="50"/>
     <parent link="base_link"/>
     <child link="lwheel_link"/>
-    <origin xyz="0 -0.16189 0"/>
+    <origin xyz="0 0.16189 0"/>
 </joint>
 
  <transmission name="scooter_left_wheel_trans">
@@ -282,6 +286,7 @@
 <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
     </plugin>
   </gazebo>
 
