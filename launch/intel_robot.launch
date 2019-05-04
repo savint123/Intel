@@ -28,11 +28,12 @@
 
 <rosparam command="load" file="$(find intel)/config/joints.yaml"/>
 <rosparam command="load" file="$(find intel)/config/diffdrive.yaml"/>
+<!--rosparam command="load" file="$(find intel)/config/gazebo_controllers.yaml"/-->
 
-<node name="intel_robot_controller_spawner" pkg="controller_manager" type="spawner" respawn="true" output="screen"   args="intel_robot/joint_state_controller intel_robot/diff_drive_controller"/>
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"   args="intel_robot/joint_state_controller intel_robot/diff_drive_controller"/>
 
-<node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> <param name="default_topic" value="intel_robot/diff_drive_controller/cmd_vel"/>
-</node>
+<!--node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> <param name="default_topic" value="intel_robot/diff_drive_controller/cmd_vel"/>
+</node-->
 
 
 <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher" respawn="false" output="screen"/> 
