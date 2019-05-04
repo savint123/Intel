@@ -55,8 +55,8 @@ double run(double &velocity, double &distance, double &propotional, int &rate){
 //******** adding propotional controller for straight line cruise control*******// 
         error = yaw - ref_yaw;
         if (error != 0){
-            error = propotional * error;
-            msg.angular.z = -(error);               
+            error = -1.2 * propotional * error ;
+            msg.angular.z = (error);               
         }
         else{
             msg.angular.z = 0;
@@ -64,63 +64,90 @@ double run(double &velocity, double &distance, double &propotional, int &rate){
         vel_pub.publish(msg);   
     }
 
-    ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
+    // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
     return pose_x;
        
 }
 
-void stop(double value,double &propotional){
+void stop(double &value,double &propotional){
     geometry_msgs::Twist msg;
     ref_yaw= 0;
     error = yaw - ref_yaw;
     if (error != 0){
-        error = propotional * error;
-        msg.angular.z = -(error);               
+        error = -1.2 * propotional * error ;
+        msg.angular.z = (error );               
     }
     else{
         msg.angular.z = 0;
     }
     msg.linear.x = value; 
-    std::cout<<value<<std::endl;
+    // std::cout<<value<<std::endl;
     vel_pub.publish(msg);
 }
 
-std::vector<double> decceleration_pattern(int &number, double &velocity, int &opt){
+double vel(double &pose, int &rate){
+    static double current_pose = 0;
+    static double old_pose = 0;
+    static double velocity = 0;
+
+    current_pose = pose;    
+    velocity = (current_pose - old_pose) * rate;
+    old_pose = current_pose;
+
+    return velocity;
+    
+}
+
+std::vector<double> decceleration_pattern(double &stop_time, int &number, double &velocity, int &opt){
      std::vector<double> decceleration ;
+    //  nomralized_count devide the stop_time in required number of profiles
+     double nomralized_count = stop_time /number;
+    //  decceleration value given current velocity and stop time requirement
+     double decceleration_ = velocity / stop_time;
+    //  std::cout<<"current_velocity"<<std::endl<<velocity<<std::endl;
+    //  Twist msgs take velocity as input so we have to give all decceleration values in terms of velocities
+    //  Considering current velocity and stop time we calculate decresing velocities in different time steps
      switch(opt){
         case 1:
-            for(int i=0;i<number; i++){
-                // straight line decceleration profiles
-                decceleration.push_back(-(velocity/number)* i +velocity);
+            for(int i=1;i <= number; i++){
+                // straight line decceleration profiles (y = - m * x + c )
+                decceleration.push_back((-decceleration_) * (nomralized_count * i) + velocity);
+                // std::cout<<velocity/stop_time<<" : getting slope"<<std::endl;
+                // std::cout<<decceleration[i]<<std::endl;
             }
             break;
         case 2:
-            for(int i=0;i<number; i++){
-                // exponential deccelration profile
-                decceleration.push_back(velocity * std::exp(-i));
+            for(int i=1;i <= number; i++){
+                // exponential deccelration profile (y = - m * exp(x))
+                decceleration.push_back((-decceleration_) * std::exp(nomralized_count * i));
             }
             break;
         case 3:
-            for(int i=0;i<number; i++){
-                // logarithmic decceleration profile
-                decceleration.push_back(- velocity * std::log(i));
+            for(int i=1;i <= number; i++){
+                // logarithmic decceleration profile (y = m * log(x))
+                decceleration.push_back((-decceleration_) * std::log(nomralized_count * i));
             }
             break;
      }
-     
+
      return decceleration;
 }
 
 
 private:
+
 ros::Publisher vel_pub ;
 ros::Subscriber odom_sub;
 ros::Subscriber imu_sub;
+
 double ref_z, ref_yaw;
 double roll, pitch, yaw;
 double pose_x,pose_y, vel_x, vel_y, ang_z, acc_x, acc_y;
 double error, temp_ang_z =0;
 double deccl;
+
+
+
 };
 
 
