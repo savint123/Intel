@@ -1,0 +1,11 @@
+intel_robot: 
+    fcaster_velocity_controller:
+    type: "velocity_controllers/JointVelocityController"
+    joint: caster_front_wheel_joint
+    pid: {p: 1.0, i: 0.1, d: 0.1}   
+
+    bcaster_velocity_controller:
+    type: "velocity_controllers/JointVelocityController"
+    joint: caster_back_wheel_joint
+    pid: {p: 1.0, i: 0.1, d: 0.1}   
+
