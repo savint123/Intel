@@ -1,0 +1,12 @@
+gazebo_ros_control:   
+    pid_gains:
+      scooter_right_wheel_joint:
+        p: 100.0
+        i: 0.01 
+        d: 10.0
+
+      scooter_left_wheel_joint:
+        p: 100.0
+        i: 0.01 
+        d: 10.0
+
