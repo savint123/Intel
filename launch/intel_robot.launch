@@ -20,7 +20,7 @@
 <arg name="use_sim_time" value="$(arg use_sim_time)"/>
 <arg name="headless" value="$(arg headless)"/>
 </include>
-<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/-->
+<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/> -->
 
 <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
@@ -28,16 +28,18 @@
 
 <rosparam command="load" file="$(find intel)/config/joints.yaml"/>
 <rosparam command="load" file="$(find intel)/config/diffdrive.yaml"/>
-<!--rosparam command="load" file="$(find intel)/config/gazebo_controllers.yaml"/-->
+<!-- <rosparam command="load" file="$(find intel)/config/caster.yaml"/> -->
+<!-- <rosparam command="load" file="$(find intel)/config/gazebo_controllers.yaml"/> -->
 
-<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"   args="intel_robot/joint_state_controller intel_robot/diff_drive_controller"/>
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"   args="intel_robot/joint_state_controller intel_robot/diff_drive_controller 
+"/>
 
-<!--node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> <param name="default_topic" value="intel_robot/diff_drive_controller/cmd_vel"/>
-</node-->
+<!-- <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"> <param name="default_topic" value="intel_robot/diff_drive_controller/cmd_vel"/>
+</node> -->
 
 
 <node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher" respawn="false" output="screen"/> 
 
-<!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/-->
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher"/>
 
 </launch>
