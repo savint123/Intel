@@ -2,7 +2,8 @@
 #define _EXPERIMENT_H_INCLUDED_
 
 #include <vector>
-
+#include <iostream>
+#include <fstream>
 
 #include "ros/ros.h"
 
@@ -20,6 +21,7 @@
 #include "gazebo_msgs/SetModelState.h"
 #include "gazebo_msgs/GetModelState.h"
 
+#include "CSVreader.h"
 
 class experiment_{
 
@@ -77,9 +79,6 @@ void reset_robot(){
     if(set.response.success){
         ROS_INFO(" Model state is reinitialized at origin");
     }
-
-
-
 }
 
 
@@ -94,10 +93,6 @@ void gazebo_robot_state(){
     ROS_INFO("Model state is changed");
     ROS_INFO("pose x: [%f], y: [%f], z: [%f]",grPose.pose.position.x,grPose.pose.position.y,grPose.pose.position.z);
   }
-
-
-
-
 }
 
 
@@ -106,8 +101,8 @@ void run(double &velocity, double &distance, double &propotional, int &rate){
     geometry_msgs::Twist msg;
     ref_yaw= 0;
     double goal_pose = sim_current_pose + distance;
-    std::cout<<"initial_pose: "<<sim_current_pose<<std::endl;
-    std::cout<<"current_pose: "<<pose_x<<std::endl;
+    // std::cout<<"initial_pose: "<<sim_current_pose<<std::endl;
+    // std::cout<<"current_pose: "<<pose_x<<std::endl;
     if(pose_x < sim_current_pose){
         throw std::invalid_argument("gazebo internal fault occured");
     }
@@ -140,6 +135,7 @@ void full_stop(){
 
 void stop(double &value,double &propotional){
     geometry_msgs::Twist msg;    
+    
     ref_yaw= 0;
     error = yaw - ref_yaw;
     if (error != 0){
@@ -150,8 +146,10 @@ void stop(double &value,double &propotional){
         msg.angular.z = 0;
     }
     msg.linear.x = value; 
+    stats<<value<<","<<roll<<","<<pitch<<","<<yaw<<"\n";
     std::cout<<"current pitch is "<<pitch<<std::endl;
     // std::cout<<value<<std::endl;
+
     vel_pub.publish(msg);
 }
 
@@ -159,14 +157,49 @@ void stop(double &value,double &propotional){
 //     static double current_pose = 0;
 //     static double old_pose = 0;
 //     static double velocity = 0;
-
 //     current_pose = pose;    
 //     velocity = (current_pose - old_pose) * rate;
 //     old_pose = current_pose;
-
-//     return velocity;
-    
+//     return velocity;    
 // }
+
+std::vector<double> read_file(std::string &file){
+        static int value = 0;
+        std::string velocity;
+        std::string::size_type sz;
+        std::vector<double> profile;        
+        // try{
+        //     input.open(file+(std::to_string(value))+".csv");
+        //     }
+        // catch(ros::Exception &e)
+        // {
+        //     throw std::invalid_argument("No file found with given name ");
+        //     // ROS_ERROR("ROS Exception: %s", e.what());
+        //     // return -1;
+        //     }
+
+        std::string filename = file+(std::to_string(value))+".csv";
+        std::cout<<"this function is called!!!"<<std::endl;
+        CSVreader reader(filename,","); 
+        std::vector<std::vector<std::string> > dataList = reader.getData();
+
+        for(std::vector<std::string> vec : dataList)
+	        {
+		        for(std::string data : vec)
+		            {
+			            profile.push_back(std::stod (data, &sz));
+		            }
+		        std::cout<<std::endl;
+	        }
+
+
+        // while(input.good()){
+        //     getline(input,velocity,',');
+        //     profile.push_back(std::stod (velocity,&sz));
+        // }
+        // value ++;
+        return profile;
+}
 
 std::vector<double> decceleration_pattern(double &stop_time, int &number, int &opt){
      std::vector<double> decceleration ;
@@ -215,7 +248,8 @@ std_srvs::Empty reset_world;
 gazebo_msgs::SetModelState set;
 gazebo_msgs::GetModelState get;
 
-
+std::ofstream stats;
+std::ifstream input;
 
 private:
 
@@ -229,16 +263,5 @@ double pose_x,pose_y, vel_x, vel_y, ang_z, acc_x, acc_y;
 double error, temp_ang_z =0;
 double initial_pose;
 };
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
