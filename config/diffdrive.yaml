@@ -1,7 +1,7 @@
 intel_robot: 
   diff_drive_controller:
    type: "diff_drive_controller/DiffDriveController"
-   publish_rate: 50
+   publish_rate: 100
 
    left_wheel: ['scooter_left_wheel_joint']
    right_wheel: ['scooter_right_wheel_joint']
