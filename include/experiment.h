@@ -97,7 +97,7 @@ void gazebo_robot_state(){
 
 
 void run(double &velocity, double &distance, double &propotional, int &rate){
-    
+
     geometry_msgs::Twist msg;
     ref_yaw= 0;
     double goal_pose = sim_current_pose + distance;
@@ -106,25 +106,33 @@ void run(double &velocity, double &distance, double &propotional, int &rate){
     if(pose_x < sim_current_pose){
         throw std::invalid_argument("gazebo internal fault occured");
     }
+
     if(pose_x< goal_pose){     
         msg.linear.x = velocity;
 //******** adding propotional controller for straight line cruise control*******// 
-        error = yaw - ref_yaw;
-        if (error != 0){
-            error = - propotional * error ;
-            msg.angular.z = (error);               
-        }
-        else{
-            msg.angular.z = 0;
-        }
-        vel_pub.publish(msg);   
+        // error = yaw - ref_yaw;
+        // if (error != 0){
+        //     error = - propotional * error ;
+        //     msg.angular.z = (error);               
+        // }
+        // else{
+        //     msg.angular.z = 0;
+        // }         
     }
     else {
-        run_ = false;
+
+        msg.linear.x = profile[increment]; 
+        stats<<profile[increment]<<","<<pose_x<<","<<roll<<","<<pitch<<","<<yaw<<"\n";
+        std::cout<<"current pitch is "<<pitch<<std::endl;
+        increment++;
+    // std::cout<<value<<std::endl;       
     }
+        vel_pub.publish(msg);
     // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
        
-}
+    }
+
+
 void full_stop(){
     geometry_msgs::Twist msg;
     msg.linear.x = 0;
@@ -163,11 +171,11 @@ void stop(double &value,double &propotional){
 //     return velocity;    
 // }
 
-std::vector<double> read_file(std::string &file){
+void read_file(std::string &file){
         static int value = 0;
         std::string velocity;
         std::string::size_type sz;
-        std::vector<double> profile;        
+        // std::vector<double> profile;        
         // try{
         //     input.open(file+(std::to_string(value))+".csv");
         //     }
@@ -198,11 +206,11 @@ std::vector<double> read_file(std::string &file){
         //     profile.push_back(std::stod (velocity,&sz));
         // }
         // value ++;
-        return profile;
+        // return profile;
 }
 
-std::vector<double> decceleration_pattern(double &stop_time, int &number, int &opt){
-     std::vector<double> decceleration ;
+void decceleration_pattern(double &stop_time, int &number, int &opt){
+     std::vector<double> profile ;
     //  nomralized_count devide the stop_time in required number of profiles
      double nomralized_count = stop_time /number;
     //  decceleration value given current velocity and stop time requirement
@@ -214,7 +222,7 @@ std::vector<double> decceleration_pattern(double &stop_time, int &number, int &o
         case 1:
             for(int i=1;i <= number; i++){
                 // straight line decceleration profiles (y = - m * x + c )
-                decceleration.push_back((-decceleration_) * (nomralized_count * i) + vel_x);
+                profile.push_back((-decceleration_) * (nomralized_count * i) + vel_x);
                 // std::cout<<velocity/stop_time<<" : getting slope"<<std::endl;
                 // std::cout<<decceleration[i]<<std::endl;
             }
@@ -222,22 +230,23 @@ std::vector<double> decceleration_pattern(double &stop_time, int &number, int &o
         case 2:
             for(int i=1;i <= number; i++){
                 // exponential deccelration profile (y = - m * exp(x))
-                decceleration.push_back((-decceleration_) * std::exp(nomralized_count * i));
+                profile.push_back((-decceleration_) * std::exp(nomralized_count * i));
             }
             break;
         case 3:
             for(int i=1;i <= number; i++){
                 // logarithmic decceleration profile (y = m * log(x))
-                decceleration.push_back((-decceleration_) * std::log(nomralized_count * i));
+                profile.push_back((-decceleration_) * std::log(nomralized_count * i));
             }
             break;
      }
 
-     return decceleration;
+    //  return decceleration;
 }
 
 
 public:
+std::vector<double> profile;
 const double sim_current_pose = 0;
 bool run_ = true;
 ros::ServiceClient client;
@@ -250,6 +259,8 @@ gazebo_msgs::GetModelState get;
 
 std::ofstream stats;
 std::ifstream input;
+
+int increment;
 
 private:
 
