@@ -127,7 +127,8 @@ void run(double &velocity, double &distance, double &propotional, int &rate){
         std::cout<<"current pitch is "<<pitch<<std::endl;
         increment++;
         vel_pub.publish(msg);
-    // std::cout<<value<<std::endl;       
+        run_ = false;
+        std::cout<<"velocity"<<profile[increment]<<std::endl;       
     }
         
     // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
@@ -140,7 +141,7 @@ void full_stop(){
     msg.linear.x = 0;
     msg.angular.z = 0;
     vel_pub.publish(msg);
-    ros::Duration(1).sleep();
+    // ros::Duration(1).sleep();
 }
 
 void stop(double &value,double &propotional){
@@ -158,7 +159,7 @@ void stop(double &value,double &propotional){
     msg.linear.x = value; 
     stats<<value<<","<<roll<<","<<pitch<<","<<yaw<<"\n";
     std::cout<<"current pitch is "<<pitch<<std::endl;
-    // std::cout<<value<<std::endl;
+    std::cout<<value<<std::endl;
 
     vel_pub.publish(msg);
 }
@@ -173,10 +174,12 @@ void stop(double &value,double &propotional){
 //     return velocity;    
 // }
 
-void read_file(std::string &file){
+void read_file(std::string &file , int &option){
         static int value = 0;
+        std::cout<<value<<" is the current experiment file "<<std::endl;
         std::string velocity;
         std::string::size_type sz;
+        profile.clear();
         // std::vector<double> profile;        
         // try{
         //     input.open(file+(std::to_string(value))+".csv");
@@ -188,7 +191,7 @@ void read_file(std::string &file){
         //     // return -1;
         //     }
 
-        std::string filename = file+(std::to_string(value))+".csv";
+        std::string filename = file+(std::to_string(option))+".csv";
         std::cout<<"this function is called!!!"<<std::endl;
         CSVreader reader(filename,","); 
         std::vector<std::vector<std::string> > dataList = reader.getData();
@@ -223,14 +226,17 @@ void decceleration_pattern(double &stop_time, int &number, int &opt){
     std::cout<<"generating decceleration profiles \n";
      switch(opt){
         case 1:
+            profile.clear();
             for(int i=1;i <= number; i++){
                 // straight line decceleration profiles (y = - m * x + c )
+
                 profile.push_back((-decceleration_) * (nomralized_count * i) + vel_x);
                 // std::cout<<velocity/stop_time<<" : getting slope"<<std::endl;
                 // std::cout<<decceleration[i]<<std::endl;
             }
             break;
         case 2:
+            profile.clear();
             for(int i=1;i <= number; i++){
                 // exponential deccelration profile (y = - m * exp(x))
                 // profile.push_back((-decceleration_) * std::exp(nomralized_count * i));
@@ -238,6 +244,7 @@ void decceleration_pattern(double &stop_time, int &number, int &opt){
             }
             break;
         case 3:
+            profile.clear();
             for(int i=1;i <= number; i++){
                 std::cout<<"this case is called\n";
                 // exponential deccelration profile (y = - m * exp(x))
@@ -245,6 +252,7 @@ void decceleration_pattern(double &stop_time, int &number, int &opt){
             }
             break;
         case 4:
+            profile.clear();
             for(int i=1;i <= number; i++){
                 // logarithmic decceleration profile (y = m * log(x))
                 profile.push_back((-decceleration_) * std::log(nomralized_count * i));

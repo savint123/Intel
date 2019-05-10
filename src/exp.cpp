@@ -39,8 +39,10 @@ int main(int argc,char **argv){
     // create profile if true else read from given files
     
 
-
-    ros::Rate r(rate);   
+    // run time rate
+    ros::Rate r(rate);
+    // stop time rate;   
+    ros::Rate s(rate/stop_time);
     
 
     while(ros::ok() && current_sim<sims){   
@@ -64,7 +66,7 @@ int main(int argc,char **argv){
                     
                     }
                     else {
-                        robot.read_file(file_);
+                        robot.read_file(file_, current_sim );
                     }
                 }
         }
@@ -84,13 +86,18 @@ int main(int argc,char **argv){
                     robot.run_ = true;
                     ++current_sim;
                     // sleep for 1 second
-                    ros::Duration(1).sleep();
+                    // ros::Duration(1).sleep();
                     robot.gazebo_robot_state();
                     }
-        
+        if (robot.run_){
             r.sleep();
-            ros::spinOnce();
-            
+        }
+        else{
+            s.sleep();
+        }
+        
+        ros::spinOnce();
+        
         }     
     return 0;
 }
