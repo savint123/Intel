@@ -118,6 +118,7 @@ void run(double &velocity, double &distance, double &propotional, int &rate){
         // else{
         //     msg.angular.z = 0;
         // }         
+        vel_pub.publish(msg);
     }
     else {
 
@@ -125,9 +126,10 @@ void run(double &velocity, double &distance, double &propotional, int &rate){
         stats<<profile[increment]<<","<<pose_x<<","<<roll<<","<<pitch<<","<<yaw<<"\n";
         std::cout<<"current pitch is "<<pitch<<std::endl;
         increment++;
+        vel_pub.publish(msg);
     // std::cout<<value<<std::endl;       
     }
-        vel_pub.publish(msg);
+        
     // ROS_INFO("yaw: [%f] and error_yaw: [%f]", yaw, error);   
        
     }
@@ -210,7 +212,7 @@ void read_file(std::string &file){
 }
 
 void decceleration_pattern(double &stop_time, int &number, int &opt){
-     std::vector<double> profile ;
+    //  std::vector<double> profile ;
     //  nomralized_count devide the stop_time in required number of profiles
      double nomralized_count = stop_time /number;
     //  decceleration value given current velocity and stop time requirement
@@ -218,6 +220,7 @@ void decceleration_pattern(double &stop_time, int &number, int &opt){
      std::cout<<"current_velocity"<<std::endl<<vel_x<<std::endl;
     //  Twist msgs take velocity as input so we have to give all decceleration values in terms of velocities
     //  Considering current velocity and stop time we calculate decresing velocities in different time steps
+    std::cout<<"generating decceleration profiles \n";
      switch(opt){
         case 1:
             for(int i=1;i <= number; i++){
@@ -230,10 +233,18 @@ void decceleration_pattern(double &stop_time, int &number, int &opt){
         case 2:
             for(int i=1;i <= number; i++){
                 // exponential deccelration profile (y = - m * exp(x))
-                profile.push_back((-decceleration_) * std::exp(nomralized_count * i));
+                // profile.push_back((-decceleration_) * std::exp(nomralized_count * i));
+                profile.push_back( 1.1 * std::exp(-nomralized_count * 1 * i));
             }
             break;
         case 3:
+            for(int i=1;i <= number; i++){
+                std::cout<<"this case is called\n";
+                // exponential deccelration profile (y = - m * exp(x))
+                profile.push_back(1.2* std::exp(-nomralized_count * 4 * i));
+            }
+            break;
+        case 4:
             for(int i=1;i <= number; i++){
                 // logarithmic decceleration profile (y = m * log(x))
                 profile.push_back((-decceleration_) * std::log(nomralized_count * i));
